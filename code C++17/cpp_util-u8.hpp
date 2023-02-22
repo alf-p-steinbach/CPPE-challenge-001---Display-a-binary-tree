@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "cpp_util-basic-types.hpp"         // Byte
 #include "cpp_util-type-builders.hpp"       // in_, ref_, array_of_
+#include "cpp_util-containers.hpp"          // is_empty
 
 #include <string>
 #include <string_view>      // std::string_view
@@ -78,20 +79,20 @@ namespace cpp_util::u8 {
         array_of_<buf_size, char>   m_units;    // With 8-bit bytes this is 32 bits.
         
     public:
-        Codepoint(): m_units() {}
+        constexpr Codepoint(): m_units() {}
 
-        Codepoint( const char ch ): m_units{ ch, '\0' } {}
+        constexpr Codepoint( const char ch ): m_units{ ch } {}
 
-        explicit Codepoint( const_<const char*> p_seq_start )
+        constexpr explicit Codepoint( const_<const char*> p_seq_start )
             : m_units()
         {
             const int n = n_seq_bytes_of( p_seq_start );
             for( int i = 0; i < n; ++i ) { m_units[i] = p_seq_start[i]; }
         }
         
-        auto data() const -> const char*    { return m_units; }
-        auto size() const -> int            { return n_seq_bytes_of( m_units ); }
-        auto sv() const -> string_view      { return {data(), 1u*size()}; }
+        constexpr auto data() const -> const char*  { return m_units; }
+        constexpr auto size() const -> int          { return n_seq_bytes_of( m_units ); }
+        constexpr auto sv() const -> string_view    { return {data(), 1u*size()}; }
     };
 
     class Composer
@@ -101,10 +102,12 @@ namespace cpp_util::u8 {
     public:
         Composer() {}
 
+        explicit Composer( const int width ): m_codepoints( width, ' ' ) {}
+
         Composer( in_<string_view> s )
         {
             const_<const char*> p_end = s.data() + s.size();
-            for( const char* p = s.data(); p < p_end; advance( p ) ) {
+           for( const char* p = s.data(); p < p_end; advance( p ) ) {
                 m_codepoints.emplace_back( p );
             }
         }
@@ -128,10 +131,10 @@ namespace cpp_util::u8 {
             if( int_size_of( m_codepoints ) < size ) { m_codepoints.resize( size, ' ' ); }
         }
 
-        auto sized_for( const int i )
+        auto sized_for_index( const int i )
             -> Composer&
         {
-            if( i >= int_size_of( m_codepoints ) ) { ensure_size( i + 1 ); }
+            ensure_size( i + 1 );
             return *this;
         }
 

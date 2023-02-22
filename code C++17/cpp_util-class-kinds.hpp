@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #ifdef _MSC_VER
-#   pragma warning( disable: 4624 )     // "destructor was implicitly defined as deleted"
+#   pragma warning( disable: 4624 )         // "destructor was implicitly defined as deleted"
 #endif
 
 #include "cpp_util-type-builders.hpp"       // in_
@@ -23,11 +23,10 @@ namespace cpp_util {
         Non_copyable() {}
     };
     
-    class Non_instantiable
+    class Static_class  // non-instantiable
     {
     public:
-        ~Non_instantiable() = delete;
-        auto operator new( size_t ) -> void* = delete;      // Not hack-proof, but.
-        auto operator new[]( size_t ) -> void* = delete;
+        Static_class() = delete;
+        Static_class( in_<Static_class> ) = delete;
     };
 }  // namespace cpp_util
